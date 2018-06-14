@@ -58,25 +58,32 @@ public class Spider implements Runnable {
                 }
                 completeCdl = new CountDownLatch(1);
             } else {
-                SpiderContext context = engine.getContext(req);
-                if (context != null) {
-                    SpiderResponse res = context.getFetch().fetch(req);
-                    if (res == null) {
-                        continue;
-                    }
-                    int status  = res.getStatus();
-                    if (status == 200) {
-                        SpiderBean bean = context.getRender().render(context.getBeanClazz(),req,res);
-                        IPipeline pipeline = context.getPipeline();
-                        if (pipeline != null) {
-                            pipeline.process(bean);
+                try {
+                    SpiderContext context = engine.getContext(req);
+                    if (context != null) {
+                        SpiderResponse res = context.getFetch().fetch(req);
+                        if (res == null) {
+                            continue;
                         }
-                    } else if (status == 301 || status == 302) {
-                        engine.getQueue().offer(req.subRequest(res.getContent()));
+                        int status  = res.getStatus();
+                        if (status == 200) {
+                            SpiderBean bean = context.getRender().render(context.getBeanClazz(),req,res);
+                            IPipeline pipeline = context.getPipeline();
+                            if (pipeline != null) {
+                                pipeline.process(bean);
+                            }
+                        } else if (status == 301 || status == 302) {
+                            engine.getQueue().offer(req.subRequest(res.getContent()));
+                        }
                     }
+
+                    interval();
+
+                } catch (Exception e) {
+                    log.error("非期望异常",e);
+                    engine.notifyComplete();
                 }
 
-                interval();
             }
         }
     }

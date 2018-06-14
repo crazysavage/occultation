@@ -7,5 +7,5 @@ package com.occultation.www.model;
  * @version V1.0
  * @since 2017-08-23 16:31
  */
-public class JsonBean implements SpiderBean {
+public class JsonBean extends BaseBean {
 }

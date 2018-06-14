@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.occultation.www.util.UrlMatch;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -171,7 +172,6 @@ public class ContextFactory {
             }
 
             Content content = bean.getAnnotation(Content.class);
-            content.url();
             IRender render = this.renderFactory.create(renderType);
             IFetch fetch = this.fetchFactory.create(content.fetch());
             IPipeline pipeline = this.pipelineFactory.create(content.pipeline());
@@ -197,9 +197,10 @@ public class ContextFactory {
         String url = req.getUrl();
         SpiderContext context = null;
         for (String urlPattern : this.contextMap.keySet()) {
-            Pattern p = Pattern.compile(urlPattern);
-            Matcher m = p.matcher(url);
-            if (m.matches()) {
+
+            Map<String, String> params = UrlMatch.match(url,urlPattern);
+            if (params != null) {
+                req.addParams(params);
                 return this.contextMap.get(urlPattern);
             }
             if (urlPattern.equals("*")) {
