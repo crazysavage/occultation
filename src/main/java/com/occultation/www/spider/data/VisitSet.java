@@ -19,7 +19,8 @@ public class VisitSet implements Visit {
     }
 
     @Override
-    public boolean isVisited(String url) {
-        return !visSet.add(url);
+    public boolean isVisited(String hash) {
+
+        return !visSet.add(hash);
     }
 }

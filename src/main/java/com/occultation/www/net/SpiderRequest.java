@@ -139,9 +139,10 @@ public class SpiderRequest implements Cloneable {
     public String getKey() {
         Assert.isTrue(StringUtils.isNoneEmpty(this.url), "请求中的Url为空");
         String s = "";
+        String path = this.url.replaceAll("https?://","");
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(this.url.getBytes());
+            md.update(url.getBytes());
             byte[] temp = md.digest();
             StringBuilder sb = new StringBuilder();
             for (byte t: temp) {

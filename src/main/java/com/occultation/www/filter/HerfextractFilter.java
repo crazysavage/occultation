@@ -22,7 +22,9 @@ public class HerfextractFilter implements Filter{
     @Override
     public void doFilter(SpiderRequest req, SpiderResponse res, FilterChain chain) {
         chain.doFilter(req,res);
-        if (SpiderThreadLocal.get().getEngine().getCanExtractHref() && res.getContentType().contains("html")) {
+        if (SpiderThreadLocal.get().getEngine().getCanExtractHref()
+                && res.getContentType()!= null
+                && res.getContentType().contains("html")) {
             Document doc = Jsoup.parse(res.getContent(),req.getUrl());
             Elements links = doc.select("a[href]");
             for (Element link : links)  {

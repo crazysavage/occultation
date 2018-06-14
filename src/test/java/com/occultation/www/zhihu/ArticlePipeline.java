@@ -1,4 +1,4 @@
-package com.occultation.www.meituan;
+package com.occultation.www.zhihu;
 
 import com.occultation.www.annotation.Pipeline;
 import com.occultation.www.model.SpiderBean;
@@ -10,8 +10,8 @@ import com.occultation.www.render.IPipeline;
  * @author yejy
  * @since 2018-06-12 19:56
  */
-@Pipeline("goodsPipeline")
-public class GoodsPipeline implements IPipeline {
+@Pipeline("articlePipeline")
+public class ArticlePipeline implements IPipeline {
 
     @Override
     public void process(SpiderBean bean) {
