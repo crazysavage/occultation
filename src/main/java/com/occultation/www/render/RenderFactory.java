@@ -1,8 +1,15 @@
 package com.occultation.www.render;
 
 import com.occultation.www.enums.RenderTypeEnum;
+import com.occultation.www.model.HtmlBean;
+import com.occultation.www.model.JsonBean;
+import com.occultation.www.model.SpiderBean;
 import com.occultation.www.render.html.HtmlRender;
 import com.occultation.www.render.json.JsonRender;
+import com.occultation.www.util.ClassUtils;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * TODO
@@ -13,16 +20,17 @@ import com.occultation.www.render.json.JsonRender;
  */
 public class RenderFactory {
 
-    public IRender create(RenderTypeEnum type) {
-        switch (type) {
-            case html:
-                return new HtmlRender();
-            case json:
-                return new JsonRender();
-            default:
-                throw new IllegalArgumentException("type is undefined");
-        }
+    Map<Class,IRender> cache = new ConcurrentHashMap<>();
 
+    public IRender create(Class clazz) {
+        if (ClassUtils.isSubType(clazz, HtmlBean.class)) {
+            return cache.computeIfAbsent(clazz,key -> new HtmlRender());
+        } else if (ClassUtils.isSubType(clazz, JsonBean.class)) {
+            return cache.computeIfAbsent(clazz,key -> new JsonRender());
+        } else {
+            throw new IllegalArgumentException("type is undefined");
+        }
     }
+
 
 }

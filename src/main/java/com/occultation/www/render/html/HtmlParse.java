@@ -84,7 +84,7 @@ public class HtmlParse {
         }
         String content = e.outerHtml();
         SpiderResponse sub = res.getSubResponse(content);
-        return FactoryUtils.getRenderFactory().create(RenderTypeEnum.html).render(clazz,req,sub);
+        return FactoryUtils.getRenderFactory().create(clazz).render(clazz,req,sub);
     }
 
     private Object getValue(Html html,Class<?> type, Element el) {

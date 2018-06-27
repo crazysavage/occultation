@@ -2,6 +2,8 @@ package com.occultation.www.zhihu;
 
 import com.occultation.www.annotation.Pipeline;
 import com.occultation.www.model.SpiderBean;
+import com.occultation.www.net.SpiderRequest;
+import com.occultation.www.net.SpiderResponse;
 import com.occultation.www.render.IPipeline;
 
 /**
@@ -14,7 +16,7 @@ import com.occultation.www.render.IPipeline;
 public class ArticlePipeline implements IPipeline {
 
     @Override
-    public void process(SpiderBean bean) {
+    public void process(SpiderBean bean, SpiderRequest req, SpiderResponse res) {
         System.out.println(bean.toString());
     }
 }

@@ -17,16 +17,7 @@ import com.occultation.www.render.IRender;
 import com.occultation.www.render.PipelineFactory;
 import com.occultation.www.render.RenderFactory;
 import com.occultation.www.util.ClassUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.occultation.www.util.UrlMatch;
+import com.occultation.www.util.UrlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -34,6 +25,8 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * TODO
@@ -161,18 +154,8 @@ public class ContextFactory {
         Set<Class<?>> beans = reflections.getTypesAnnotatedWith(Content.class);
         Map<String,SpiderContext> contextMap = new HashMap<>();
         for (Class<?> bean : beans) {
-            RenderTypeEnum renderType;
-            if (ClassUtils.isSubType(bean,HtmlBean.class)) {
-                renderType = RenderTypeEnum.html;
-            } else if (ClassUtils.isSubType(bean,JsonBean.class)) {
-                renderType = RenderTypeEnum.json;
-            } else {
-                log.error("cant resolve the {}, check it's type",bean.getCanonicalName());
-                continue;
-            }
-
             Content content = bean.getAnnotation(Content.class);
-            IRender render = this.renderFactory.create(renderType);
+            IRender render = this.renderFactory.create(bean);
             IFetch fetch = this.fetchFactory.create(content.fetch());
             IPipeline pipeline = this.pipelineFactory.create(content.pipeline());
             SpiderContext context = new SpiderContext((Class<? extends SpiderBean>)bean,fetch,render,pipeline);
@@ -198,7 +181,7 @@ public class ContextFactory {
         SpiderContext context = null;
         for (String urlPattern : this.contextMap.keySet()) {
 
-            Map<String, String> params = UrlMatch.match(url,urlPattern);
+            Map<String, String> params = UrlUtils.match(url,urlPattern);
             if (params != null) {
                 req.addParams(params);
                 return this.contextMap.get(urlPattern);

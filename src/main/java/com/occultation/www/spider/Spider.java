@@ -70,14 +70,14 @@ public class Spider implements Runnable {
                             SpiderBean bean = context.getRender().render(context.getBeanClazz(),req,res);
                             IPipeline pipeline = context.getPipeline();
                             if (pipeline != null) {
-                                pipeline.process(bean);
+                                pipeline.process(bean,req,res);
                             }
                         } else if (status == 301 || status == 302) {
                             engine.getQueue().offer(req.subRequest(res.getContent()));
                         }
+                        interval();
                     }
 
-                    interval();
 
                 } catch (Exception e) {
                     log.error("非期望异常",e);

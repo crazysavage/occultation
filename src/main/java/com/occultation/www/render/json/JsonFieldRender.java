@@ -99,7 +99,7 @@ public class JsonFieldRender implements IFieldRender {
             return null;
         }
         SpiderResponse next = res.getSubResponse(JSON.toJSONString(value));
-        return FactoryUtils.getRenderFactory().create(RenderTypeEnum.json).render(type,req,next);
+        return FactoryUtils.getRenderFactory().create(type).render(type,req,next);
     }
 
     private List<Object> list(Class<?> type,Object value) {

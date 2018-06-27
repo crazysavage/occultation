@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
  * @version 1.0.0
  */
 public class SpiderRequest implements Cloneable {
+    private String key;
     private String url;
     private HttpMethodEnum type;
     private Map<String,String> params;
@@ -48,6 +49,7 @@ public class SpiderRequest implements Cloneable {
 
     public void setUrl(String url) {
         this.url = url;
+        this.key = null;
     }
 
     public HttpMethodEnum getType() {
@@ -137,12 +139,18 @@ public class SpiderRequest implements Cloneable {
     }
     
     public String getKey() {
+
+        if (StringUtils.isNotEmpty(this.key)) {
+            return this.key;
+        }
+
+
         Assert.isTrue(StringUtils.isNoneEmpty(this.url), "请求中的Url为空");
         String s = "";
         String path = this.url.replaceAll("https?://","");
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(url.getBytes());
+            md.update(path.getBytes());
             byte[] temp = md.digest();
             StringBuilder sb = new StringBuilder();
             for (byte t: temp) {
@@ -153,6 +161,7 @@ public class SpiderRequest implements Cloneable {
                 sb.append(Integer.toHexString(value));
             }
             s = sb.toString();
+            this.key = s;
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }

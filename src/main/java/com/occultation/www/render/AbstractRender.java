@@ -1,12 +1,15 @@
 package com.occultation.www.render;
 
+import com.occultation.www.SpiderContext;
+import com.occultation.www.annotation.Ajax;
 import com.occultation.www.annotation.Href;
+import com.occultation.www.annotation.Html;
 import com.occultation.www.model.SpiderBean;
 import com.occultation.www.net.SpiderRequest;
 import com.occultation.www.net.SpiderResponse;
+import com.occultation.www.spider.SpiderThreadLocal;
 import com.occultation.www.spider.data.QueueContext;
-import com.occultation.www.util.BeanUtils;
-import com.occultation.www.util.ClassUtils;
+import com.occultation.www.util.*;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -32,6 +35,7 @@ public abstract class AbstractRender implements IRender,IFieldRender  {
         try {
             SpiderBean bean = beanClazz.newInstance();
             fieldRender(bean,res,req);
+            ajaxRender(bean,req);
             extractHref(bean,req);
             return bean;
         } catch (InstantiationException | IllegalAccessException e) {
@@ -39,6 +43,24 @@ public abstract class AbstractRender implements IRender,IFieldRender  {
         }
 
         return null;
+    }
+    @SuppressWarnings({"unchecked"})
+    public void ajaxRender(SpiderBean bean, SpiderRequest req) {
+        Set<Field> fields = ReflectionUtils.getAllFields(bean.getClass(),ReflectionUtils.withAnnotation(Ajax.class));
+        for (Field field :  fields) {
+            Assert.isTrue(ClassUtils.isSubType((Class)field.getGenericType(),SpiderBean.class),"Ajax should annotation SpiderBean");
+            Ajax ajax = field.getAnnotation(Ajax.class);
+            String url = UrlUtils.composeUrl(ajax.src(),req,bean);
+            SpiderRequest subReq = req.subRequest(url);
+            subReq.setType(ajax.method());
+            SpiderResponse ajaxRes = new SpiderResponse();
+            SpiderContext context = SpiderThreadLocal.get().getEngine().getContext(req);
+            context.getFetch().doFetch(subReq, ajaxRes);
+
+            SpiderBean ajaxBean = FactoryUtils.getRenderFactory().create((Class<?>) field.getGenericType())
+            .render((Class<? extends SpiderBean>) field.getGenericType(),subReq, ajaxRes);
+            BeanUtils.injectField(bean,field,ajaxBean);
+        }
     }
 
     @SuppressWarnings({"unchecked"})
