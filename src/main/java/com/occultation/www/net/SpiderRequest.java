@@ -2,13 +2,13 @@ package com.occultation.www.net;
 
 import com.occultation.www.enums.HttpMethodEnum;
 import com.occultation.www.util.Assert;
+import org.apache.commons.lang3.StringUtils;
 
+import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * @Type SpiderRequest
@@ -17,7 +17,10 @@ import org.apache.commons.lang3.StringUtils;
  * @created 2017年6月30日 下午3:28:27
  * @version 1.0.0
  */
-public class SpiderRequest implements Cloneable {
+public class SpiderRequest implements Serializable {
+
+    private static final long serialVersionUID = 3797374622690864165L;
+
     private String key;
     private String url;
     private HttpMethodEnum type;
@@ -147,10 +150,10 @@ public class SpiderRequest implements Cloneable {
 
         Assert.isTrue(StringUtils.isNoneEmpty(this.url), "请求中的Url为空");
         String s = "";
-        String path = this.url.replaceAll("https?://","");
+        String keyStr = this.url.replaceAll("https?://","") + params.toString();
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(path.getBytes());
+            md.update(keyStr.getBytes());
             byte[] temp = md.digest();
             StringBuilder sb = new StringBuilder();
             for (byte t: temp) {
@@ -172,13 +175,35 @@ public class SpiderRequest implements Cloneable {
     public SpiderRequest subRequest(String url) {
         SpiderRequest sub = null;
         try {
-            sub = (SpiderRequest) this.clone();
+            sub = (SpiderRequest) copy();
             sub.setUrl(url);
             sub.setRefer(this.url);
-        } catch (CloneNotSupportedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return sub;
+    }
+
+    public Object copy() throws IOException, ClassNotFoundException{
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(this);
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
+        return ois.readObject();
+    }
+
+    public String paramToString() {
+        if (params.size() == 0) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(64);
+        for (Map.Entry param : params.entrySet()) {
+            sb.append(param.getKey());
+            sb.append("=");
+            sb.append(param.getValue());
+            sb.append("&");
+        }
+        return sb.substring(0, sb.length() - 1);
     }
     
     

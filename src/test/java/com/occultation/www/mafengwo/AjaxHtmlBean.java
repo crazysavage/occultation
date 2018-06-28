@@ -1,5 +1,6 @@
 package com.occultation.www.mafengwo;
 
+import com.occultation.www.annotation.Content;
 import com.occultation.www.annotation.Json;
 import com.occultation.www.model.JsonBean;
 
@@ -9,6 +10,7 @@ import com.occultation.www.model.JsonBean;
  * @author yejy
  * @since 2018-06-26 19:42
  */
+
 public class AjaxHtmlBean extends JsonBean {
 
     @Json("$.html")

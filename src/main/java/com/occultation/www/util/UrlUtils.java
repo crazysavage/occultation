@@ -1,5 +1,8 @@
 package com.occultation.www.util;
 
+import com.occultation.www.net.SpiderRequest;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -9,9 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.occultation.www.net.SpiderRequest;
-import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -26,7 +26,6 @@ public class UrlUtils {
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{(.*?)}");
 
     public static String composeUrl(String url,SpiderRequest req,Object bean) {
-        StringBuffer sb = new StringBuffer();
         Matcher matcher = PLACEHOLDER.matcher(url);
         List<String> names = new ArrayList<>();
         while(matcher.find()) {
@@ -34,11 +33,11 @@ public class UrlUtils {
             names.add(name);
         }
         for (String name : names) {
-            String val = req.getParam(name);
+            Object val = req.getParam(name);
             if (val == null) {
                 val = BeanUtils.getValue(bean,name).toString();
             }
-            url = url.replaceFirst("\\{(.*?)}",val);
+            url = url.replaceFirst("\\{(.*?)}",val.toString());
         }
 
         return url;

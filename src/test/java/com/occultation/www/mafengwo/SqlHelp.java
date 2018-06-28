@@ -72,10 +72,13 @@ public class SqlHelp {
 
 
     public int insert(String sql,Object o) {
+        List vals = getParamVals(sql,o);
+        sql = formatSql(sql);
+        Connection connection = null;
+        PreparedStatement ps = null;
         try {
-            List vals = getParamVals(sql,o);
-            sql = formatSql(sql);
-            PreparedStatement ps = getConnection().prepareStatement(sql);
+            connection = getConnection();
+            ps = connection.prepareStatement(sql);
             int idx = 1;
             for (Object val : vals) {
                 ps.setObject(idx,val);
@@ -84,6 +87,23 @@ public class SqlHelp {
             return ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
 
         return 0;

@@ -130,10 +130,10 @@ gradle.taskGraph.whenReady { taskGraph ->
     uploadArchives {
         repositories {
             mavenDeployer {
-                repository(url: 'http://nexus.guahao-inc.com/nexus/content/repositories/releases') {
+                repository(url: 'http://repo.maven.apache.org/maven2/') {
                     authentication(userName: userName, password: password)
                 }
-                snapshotRepository(url: 'http://nexus.guahao-inc.com/nexus/content/repositories/snapshots') {
+                snapshotRepository(url: 'http://repo.maven.apache.org/maven2/') {
                     authentication(userName: 'lxsnap', password: 'Lxsnap123')
                 }
                 uniqueVersion = true

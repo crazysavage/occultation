@@ -40,7 +40,7 @@ public class HtmlFiledRender implements IFieldRender {
     private Object getValue(Field field,HtmlParse parse) {
         Class<?> type = field.getType();
         if (isSubType(type,List.class)) {
-            Class<?> generic = ClassUtils.getGenericClass(type);
+            Class<?> generic = ClassUtils.getGenericClass(field.getGenericType());
             if (isSubType(generic, SpiderBean.class)) {
                 return parse.listBean(field, (Class<? extends SpiderBean>) generic);
             } else {

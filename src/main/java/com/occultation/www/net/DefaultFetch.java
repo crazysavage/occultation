@@ -51,7 +51,7 @@ import sun.misc.BASE64Encoder;
 @Fetch("default")
 public class DefaultFetch extends AbstractFetch {
     
-    private static final int TIME_OUT = 1000;
+    private static final int TIME_OUT = 30000;
     
     private static final Logger log = LoggerFactory.getLogger(DefaultFetch.class);
     
@@ -150,7 +150,13 @@ public class DefaultFetch extends AbstractFetch {
         Assert.isTrue(method != null, "http method is undefined"); 
         switch (method) {
         case GET:
-            HttpGet get = new HttpGet(req.getUrl());
+            String url = req.getUrl();
+            String paramStr = req.paramToString();
+            if (StringUtils.isNotEmpty(paramStr)) {
+                url += url.contains("?") ? "&" : "?";
+                url += paramStr;
+            }
+            HttpGet get = new HttpGet(url);
             wrapRequest(get,req);
             return get;
         case POST:
@@ -174,6 +180,8 @@ public class DefaultFetch extends AbstractFetch {
         for(Map.Entry<String, String> entry : req.getHeads().entrySet()) {
             request.setHeader(entry.getKey(), entry.getValue());
         }
+
+
         RequestConfig.Builder bulider = RequestConfig.custom()
         .setConnectionRequestTimeout(TIME_OUT)
         .setSocketTimeout(TIME_OUT)

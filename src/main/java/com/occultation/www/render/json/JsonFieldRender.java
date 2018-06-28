@@ -57,7 +57,7 @@ public class JsonFieldRender implements IFieldRender {
         }
         Object value = JSONPath.eval(json,path);
         if (isSubType(type,List.class)) {
-            Class<?> generic = getGenericClass(type);
+            Class<?> generic = getGenericClass(field.getGenericType());
             if (isSubType(generic, SpiderBean.class)) {
                 return listBean((Class<? extends SpiderBean>) type,value,res,req);
             } else {
@@ -98,7 +98,7 @@ public class JsonFieldRender implements IFieldRender {
         if (value == null) {
             return null;
         }
-        SpiderResponse next = res.getSubResponse(JSON.toJSONString(value));
+        SpiderResponse next = res.getSubResponse(value.toString());
         return FactoryUtils.getRenderFactory().create(type).render(type,req,next);
     }
 
