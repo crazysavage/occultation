@@ -2,6 +2,7 @@ package com.occultation.www;
 
 import com.occultation.www.net.SpiderRequest;
 import com.occultation.www.spider.Spider;
+import com.occultation.www.spider.SpiderThreadFactory;
 import com.occultation.www.spider.data.BasicReqQueue;
 import com.occultation.www.spider.data.ReqQueue;
 import com.occultation.www.util.Assert;
@@ -60,11 +61,11 @@ public class Engine {
 
         cdl = new CountDownLatch(spiderSize);
         spiders =  new ArrayList<>(spiderSize);
-
+        SpiderThreadFactory factory = new SpiderThreadFactory();
         for (int i = 0; i < spiderSize; i++) {
             Spider spider = new Spider(this, interval);
             spiders.add(spider);
-            new Thread(spider).start();
+            factory.newThread(spider).start();
         }
         int step = 0;
         while (deep < 0 || deep > 0) {
@@ -157,5 +158,9 @@ public class Engine {
 
     protected void setCanExtractHref(boolean canExtractHref) {
         this.canExtractHref = canExtractHref;
+    }
+
+    public int getDeep() {
+        return this.deep;
     }
 }

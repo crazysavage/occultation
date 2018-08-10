@@ -53,6 +53,7 @@ public class Spider implements Runnable {
             
             SpiderRequest req = engine.getQueue().poll();
             if (req == null ) {
+                log.info("{} is fetch over in deep {}",Thread.currentThread().getName(),engine.getDeep());
                 if (engine.notifyComplete()) {
                     break;
                 }

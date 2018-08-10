@@ -5,7 +5,9 @@ import com.occultation.www.net.SpiderRequest;
 import com.occultation.www.spider.data.ReqQueue;
 import com.occultation.www.util.Assert;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +58,16 @@ public class EngineBuilder {
         return this;
     }
 
+    public final EngineBuilder setSeed(List<SpiderRequest> seeds) {
+        this.seeds = seeds;
+        return this;
+    }
+
+    public final EngineBuilder setSeed(String... urls) {
+        this.seeds = Arrays.stream(urls).map(SpiderRequest::new).collect(Collectors.toList());
+        return this;
+    }
+
     public final EngineBuilder setQueue(ReqQueue queue) {
         this.queue = queue;
         return this;
@@ -84,16 +96,20 @@ public class EngineBuilder {
         if (spiderSize < 1) {
             spiderSize = 1;
         }
-        engine.setSpiderSize(1);
+        engine.setSpiderSize(spiderSize);
+
         if (interval < 0) {
             interval = 0;
         }
         engine.setInterval(interval);
+
         if (deep == 0) {
             deep = -1;
         }
         engine.setDeep(deep);
+
         engine.setQueue(queue);
+
         if (canExtractHref == null) {
             canExtractHref = false;
         }

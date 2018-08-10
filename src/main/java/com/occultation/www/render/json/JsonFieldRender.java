@@ -59,7 +59,7 @@ public class JsonFieldRender implements IFieldRender {
         if (isSubType(type,List.class)) {
             Class<?> generic = getGenericClass(field.getGenericType());
             if (isSubType(generic, SpiderBean.class)) {
-                return listBean((Class<? extends SpiderBean>) type,value,res,req);
+                return listBean((Class<? extends SpiderBean>) generic,value,res,req);
             } else {
                 return list(type,value);
             }
