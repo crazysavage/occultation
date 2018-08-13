@@ -18,4 +18,7 @@ public class SpiderThreadLocal {
         return VAR.get();
     }
 
+    public static void clear() {
+        VAR.remove();
+    }
 }

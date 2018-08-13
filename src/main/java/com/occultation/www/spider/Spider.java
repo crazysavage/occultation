@@ -42,13 +42,14 @@ public class Spider implements Runnable {
         running = true;
         while(true) {
             if (!running) {
+                engine.notifyComplete();
                 break;
             }
             try {
                 pauseCdl.await();
                 completeCdl.await();
             } catch (InterruptedException e) {
-                log.error("发生异常.", e);
+                log.error("中断异常", e);
             }
             
             SpiderRequest req = engine.getQueue().poll();
@@ -73,8 +74,6 @@ public class Spider implements Runnable {
                             if (pipeline != null) {
                                 pipeline.process(bean,req,res);
                             }
-                        } else if (status == 301 || status == 302) {
-                            engine.getQueue().offer(req.subRequest(res.getContent()));
                         }
                         interval();
                     }
@@ -87,6 +86,8 @@ public class Spider implements Runnable {
 
             }
         }
+
+        SpiderThreadLocal.clear();
     }
     
     public void next() {

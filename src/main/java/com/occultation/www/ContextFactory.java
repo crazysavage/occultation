@@ -3,10 +3,8 @@ package com.occultation.www;
 import com.occultation.www.annotation.Content;
 import com.occultation.www.annotation.Fetch;
 import com.occultation.www.annotation.Pipeline;
-import com.occultation.www.enums.RenderTypeEnum;
 import com.occultation.www.filter.Filter;
-import com.occultation.www.model.HtmlBean;
-import com.occultation.www.model.JsonBean;
+import com.occultation.www.listener.SpiderListener;
 import com.occultation.www.model.SpiderBean;
 import com.occultation.www.net.AbstractFetch;
 import com.occultation.www.net.FetchFactory;
@@ -18,6 +16,7 @@ import com.occultation.www.render.PipelineFactory;
 import com.occultation.www.render.RenderFactory;
 import com.occultation.www.util.ClassUtils;
 import com.occultation.www.util.UrlUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -44,6 +43,8 @@ public class ContextFactory {
 
     private PipelineFactory pipelineFactory;
 
+    private List<SpiderListener> listeners;
+
     private Map<String,SpiderContext> contextMap;
 
     public ContextFactory() {
@@ -66,6 +67,7 @@ public class ContextFactory {
         initFetchFactory(reflections);
         initRenderFactory();
         initPipelineFactory(reflections);
+        initListener(reflections);
         initSpiderContext(reflections);
     }
 
@@ -164,6 +166,24 @@ public class ContextFactory {
         this.contextMap = contextMap;
     }
 
+    private void initListener(Reflections reflections) {
+        Set<Class<? extends SpiderListener>> listenerClasses =  reflections.getSubTypesOf(SpiderListener.class);
+        if (CollectionUtils.isEmpty(listenerClasses)) {
+            this.listeners = Collections.emptyList();
+        } else {
+            List<SpiderListener> instances = new ArrayList<>();
+            listenerClasses.forEach(clazz -> {
+                try {
+                    SpiderListener listener = clazz.newInstance();
+                    instances.add(listener);
+                } catch (InstantiationException | IllegalAccessException e) {
+                    log.error("init {} error", clazz.getName(), e);
+                }
+            });
+            this.listeners = instances;
+        }
+    }
+
     public FetchFactory getFetchFactory() {
         return fetchFactory;
     }
@@ -191,5 +211,9 @@ public class ContextFactory {
             }
         }
         return context;
+    }
+
+    public List<SpiderListener> getListeners() {
+        return listeners;
     }
 }

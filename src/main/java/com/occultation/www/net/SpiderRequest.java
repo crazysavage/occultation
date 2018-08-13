@@ -1,6 +1,7 @@
 package com.occultation.www.net;
 
 import com.occultation.www.enums.HttpMethodEnum;
+import com.occultation.www.net.proxy.HttpProxy;
 import com.occultation.www.util.Assert;
 import org.apache.commons.lang3.StringUtils;
 
@@ -24,6 +25,7 @@ public class SpiderRequest implements Serializable {
     private String key;
     private String url;
     private HttpMethodEnum type;
+    private HttpProxy proxy;
     private Map<String,String> params;
     private Map<String,String> heads;
     private Map<String,String> cookies;
@@ -205,6 +207,12 @@ public class SpiderRequest implements Serializable {
         }
         return sb.substring(0, sb.length() - 1);
     }
-    
-    
+
+    public HttpProxy getProxy() {
+        return proxy;
+    }
+
+    public void setProxy(HttpProxy proxy) {
+        this.proxy = proxy;
+    }
 }

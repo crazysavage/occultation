@@ -46,6 +46,10 @@ public abstract class AbstractRender implements IRender,IFieldRender  {
     }
     @SuppressWarnings({"unchecked"})
     public void ajaxRender(SpiderBean bean, SpiderRequest req) {
+        if (!SpiderThreadLocal.get().getEngine().isComplete()) {
+            return;
+        }
+
         Set<Field> fields = ReflectionUtils.getAllFields(bean.getClass(),ReflectionUtils.withAnnotation(Ajax.class));
         for (Field field :  fields) {
             Assert.isTrue(ClassUtils.isSubType((Class)field.getGenericType(),SpiderBean.class),"Ajax should annotation SpiderBean");

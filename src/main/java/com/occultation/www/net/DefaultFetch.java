@@ -9,6 +9,8 @@ import com.occultation.www.util.UrlUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,17 +53,25 @@ import sun.misc.BASE64Encoder;
 @Fetch("default")
 public class DefaultFetch extends AbstractFetch {
     
-    private static final int TIME_OUT = 30000;
+    private static final int TIME_OUT = 10000;
     
     private static final Logger log = LoggerFactory.getLogger(DefaultFetch.class);
     
     private PoolingHttpClientConnectionManager cm;
     
-    private HttpClientContext cookieContext;
+    private final HttpClientContext cookieContext;
+
+    private final CloseableHttpClient client;
+
+    public DefaultFetch() {
+        super();
+        this.cookieContext = HttpClientContext.create();
+        this.cookieContext.setCookieStore(new BasicCookieStore());
+        this.client = initClient();
+    }
 
     @Override
     public void doFetch(SpiderRequest req, SpiderResponse result) {
-        CloseableHttpClient client = getClient();
         HttpRequestBase httpReq = toHttpReq(req) ;
         for (Map.Entry<String, String> entry : req.getCookies().entrySet()) {
             BasicClientCookie cookie = new BasicClientCookie(entry.getKey(), entry.getValue());
@@ -69,15 +79,17 @@ public class DefaultFetch extends AbstractFetch {
             cookie.setDomain(httpReq.getURI().getHost());
             cookieContext.getCookieStore().addCookie(cookie);
         }
+        execute(httpReq,1,result);
+    }
+
+    private void execute(HttpRequestBase req, int redirectNum, SpiderResponse result) {
         try {
-            HttpResponse response = client.execute(httpReq,cookieContext);
+            HttpResponse response = client.execute(req,cookieContext);
             int status  = response.getStatusLine().getStatusCode();
             result.setStatus(status);
-
             if (status > 199 && status <300) {
                 result.setStatus(200);
 
-                //xml
                 if (response.getEntity() == null) {
                     return;
                 }
@@ -86,36 +98,46 @@ public class DefaultFetch extends AbstractFetch {
                 String charset = getCharset(contentType);
                 result.setContentType(contentType);
                 result.setCharset(charset);
+
                 String content;
+
                 if (isImage(contentType)) {
                     content = new BASE64Encoder().encode(EntityUtils.toByteArray(response.getEntity()));
                 } else {
                     content = EntityUtils.toString(response.getEntity(),charset);
                 }
-                result.setContent(content);                    
-            } else if (status == 301 || status == 302) {
+                result.setContent(content);
+            } else if ((status == 301 || status == 302) && redirectNum < 4) {
                 //重定向
                 String redirectUrl = response.getFirstHeader("Location").getValue();
-                result.setContent(UrlUtils.getAbsoluteUrl(req.getUrl(), redirectUrl));
+                try {
+                    req.setURI(new URI(redirectUrl));
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException("redirect url syntax is error, url = " + redirectUrl ,e);
+                }
+
+                execute(req,++redirectNum,result);
             } else {
                 //异常访问4XX 5XX
-                log.error("http stauts : {}, url : {}",status,httpReq.getURI().toString());
+                log.error("http stauts : {}, url : {}",status,req.getURI().toString());
             }
+
         } catch (IOException e) {
+
             log.error("connect error",e);
+
         } finally {
-            httpReq.releaseConnection();
+            req.releaseConnection();
         }
     }
 
-
-    private CloseableHttpClient getClient() {
+    private CloseableHttpClient initClient() {
         return HttpClients.custom()
                 .setConnectionManager(getConnectionManager())
                 .build();
     }
     
-    private PoolingHttpClientConnectionManager getConnectionManager() {
+    private PoolingHttpClientConnectionManager  getConnectionManager() {
         if (this.cm == null) {
             initConnectionManager();
         }
@@ -124,9 +146,7 @@ public class DefaultFetch extends AbstractFetch {
     }
     
     private void initConnectionManager() {
-        cookieContext = HttpClientContext.create();
-        cookieContext.setCookieStore(new BasicCookieStore());
-        
+
         Registry<ConnectionSocketFactory> registry = null;
         try {
             SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null, (chain, authType) -> true).build();
@@ -143,6 +163,7 @@ public class DefaultFetch extends AbstractFetch {
         } else {
             this.cm = new PoolingHttpClientConnectionManager(registry);
         }
+        this.cm.setMaxTotal(200);
     }
     
     private HttpRequestBase toHttpReq(SpiderRequest req) {
@@ -181,17 +202,17 @@ public class DefaultFetch extends AbstractFetch {
             request.setHeader(entry.getKey(), entry.getValue());
         }
 
-
         RequestConfig.Builder bulider = RequestConfig.custom()
         .setConnectionRequestTimeout(TIME_OUT)
         .setSocketTimeout(TIME_OUT)
         .setConnectTimeout(TIME_OUT)
         .setRedirectsEnabled(false);
-        //设置proxy
-        HttpHost proxy = Proxys.get();
-        if (proxy != null) {
-            bulider.setProxy(proxy);
+
+        if (req.getProxy() != null) {
+            bulider.setProxy(HttpHost.create(req.getProxy().toURI()));
         }
+
+
         request.setConfig(bulider.build());    
     }
     

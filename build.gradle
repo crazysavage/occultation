@@ -66,11 +66,11 @@ task cleanAll {
 
 task init {
     doLast{
-        println '+---------------------------------------------------+'
-        println '|                                                   |'
-        println "| B U I L D I N G $project.name $version ...         "
-        println '|                                                   |'
-        println '+---------------------------------------------------+'
+        println '+------------------------------------------------------------------+'
+        println '|                                                                  |'
+        println "| B U I L D I N G $project.name $version$releaseVersion ...        |"
+        println '|                                                                  |'
+        println '+------------------------------------------------------------------+'
     }
 }
 
@@ -113,15 +113,16 @@ task publish(dependsOn: [buildJar,sourceJar, uploadArchives]) {
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.hasTask("publishSnapshot") && !version.endsWith('-SNAPSHOT')) {
+    if (taskGraph.hasTask(":publishSnapshot") && !version.endsWith('-SNAPSHOT')) {
         version ="$version"+ '-SNAPSHOT'
     }
     if(taskGraph.hasTask("publish")){
+        println "publish"
         version ="$version"
         userName = ''
         password = ''
     }
-    if (taskGraph.hasTask("publishSnapshot") || taskGraph.hasTask(":publish")){
+    if (taskGraph.hasTask(":publishSnapshot") || taskGraph.hasTask(":publish")){
         artifacts {
             archives buildJar
             archives sourceJar
@@ -130,14 +131,17 @@ gradle.taskGraph.whenReady { taskGraph ->
     uploadArchives {
         repositories {
             mavenDeployer {
-                repository(url: 'http://repo.maven.apache.org/maven2/') {
-                    authentication(userName: userName, password: password)
+                println "$version"
+
+                repository(url: 'http://nexus.51caocao.cn/content/repositories/releases') {
+                    authentication(userName: '', password: '')
                 }
-                snapshotRepository(url: 'http://repo.maven.apache.org/maven2/') {
-                    authentication(userName: 'lxsnap', password: 'Lxsnap123')
+
+                snapshotRepository(url: 'http://nexus.51caocao.cn/content/repositories/snapshots') {
+                    authentication(userName: 'yejunyou', password: 'Chinaboy@456')
                 }
                 uniqueVersion = true
-                pom.groupId = "$group"
+                pom.groupId = "com.occultation.www"
                 pom.artifactId = "$moduleName"
             }
         }

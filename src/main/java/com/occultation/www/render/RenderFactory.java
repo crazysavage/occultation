@@ -1,9 +1,7 @@
 package com.occultation.www.render;
 
-import com.occultation.www.enums.RenderTypeEnum;
 import com.occultation.www.model.HtmlBean;
 import com.occultation.www.model.JsonBean;
-import com.occultation.www.model.SpiderBean;
 import com.occultation.www.render.html.HtmlRender;
 import com.occultation.www.render.json.JsonRender;
 import com.occultation.www.util.ClassUtils;

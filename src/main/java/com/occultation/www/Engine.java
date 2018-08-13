@@ -1,13 +1,13 @@
 package com.occultation.www;
 
+import com.occultation.www.listener.SpiderListener;
 import com.occultation.www.net.SpiderRequest;
+import com.occultation.www.net.proxy.ProxyPool;
 import com.occultation.www.spider.Spider;
-import com.occultation.www.spider.SpiderThreadFactory;
-import com.occultation.www.spider.data.BasicReqQueue;
+import com.occultation.www.spider.SpiderCreator;
 import com.occultation.www.spider.data.ReqQueue;
 import com.occultation.www.util.Assert;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  */
 public class Engine {
+
     private static final Logger log = LoggerFactory.getLogger(Engine.class);
 
     private int spiderSize;
@@ -41,17 +42,21 @@ public class Engine {
 
     private int deep;
 
+    private boolean stop;
+
     private boolean canExtractHref;
 
-    protected Engine(String classpath) {
+    private ProxyPool proxyPool;
+
+    private int completeSize = 0;
+
+    Engine(String classpath) {
         this.contextFactory = new ContextFactory(classpath);
     }
 
     public void start() {
         log.info("----->>>>start occulttion<<<<-------");
-        if (queue == null) {
-            queue = new BasicReqQueue();
-        }
+        this.stop = false;
 
         Assert.isTrue(CollectionUtils.isNotEmpty(seeds),"seed's size is empty");
 
@@ -60,29 +65,33 @@ public class Engine {
         }
 
         cdl = new CountDownLatch(spiderSize);
-        spiders =  new ArrayList<>(spiderSize);
-        SpiderThreadFactory factory = new SpiderThreadFactory();
-        for (int i = 0; i < spiderSize; i++) {
-            Spider spider = new Spider(this, interval);
-            spiders.add(spider);
-            factory.newThread(spider).start();
-        }
-        int step = 0;
+        spiders = SpiderCreator.create(this,spiderSize,interval);
+
+
+        int step = 1;
         while (deep < 0 || deep > 0) {
+            ++step;
+            log.info("------->>>>执行第{}次循环<<<<-------", step);
             try {
                 cdl.await();
             } catch (InterruptedException e) {
                 log.error("发生异常.", e);
             }
+            if (this.stop) {
+                break;
+            }
             nextQueue();
-            log.info("------->>>>执行第{}次循环<<<<-------",++step);
+
         }
     }
 
     public void stop() {
+
+        this.stop = true;
         for (Spider spider : spiders) {
             spider.stop();
         }
+        log.info("spider stop;deep = {}, remain request size = {}", this.deep, this.queue.size());
     }
 
     public void pause() {
@@ -98,12 +107,23 @@ public class Engine {
     }
 
     public boolean notifyComplete() {
-        cdl.countDown();
-        boolean isComplete = (deep == 0);
-        if (isComplete){
-            log.info("----->>>>end occulttion<<<<-------");
+        boolean complete = isComplete();
+
+        if (complete) {
+            if (++completeSize == spiderSize) {
+                this.contextFactory.getListeners().forEach(SpiderListener::afterComplete);
+            }
+
+        } else {
+            cdl.countDown();
+
         }
-        return isComplete;
+
+        return complete;
+    }
+
+    public boolean isComplete() {
+        return deep == 0;
     }
     
     private void nextQueue() {
@@ -158,6 +178,14 @@ public class Engine {
 
     protected void setCanExtractHref(boolean canExtractHref) {
         this.canExtractHref = canExtractHref;
+    }
+
+    public ProxyPool getProxyPool() {
+        return proxyPool;
+    }
+
+    protected void setProxyPool(ProxyPool proxyPool) {
+        this.proxyPool = proxyPool;
     }
 
     public int getDeep() {

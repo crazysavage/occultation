@@ -1,5 +1,6 @@
 package com.occultation.www.filter;
 
+import com.google.common.collect.Lists;
 import com.occultation.www.net.IFetch;
 import com.occultation.www.net.SpiderRequest;
 import com.occultation.www.net.SpiderResponse;
@@ -34,7 +35,7 @@ public class DefaultFilterChain implements FilterChain {
 
     public DefaultFilterChain(IFetch fetch,Collection<Filter> filters) {
         if (filters != null) {
-            this.filters = filters;
+            this.filters = Lists.newArrayList(filters);
         } else {
             this.filters = new ArrayList<>();
         }
@@ -43,6 +44,7 @@ public class DefaultFilterChain implements FilterChain {
 
     @Override
     public void doFilter(SpiderRequest req,SpiderResponse res) {
+
         if (iterator == null) {
             iterator = filters.iterator();
         }

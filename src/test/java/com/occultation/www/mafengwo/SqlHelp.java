@@ -86,6 +86,7 @@ public class SqlHelp {
             }
             return ps.executeUpdate();
         } catch (SQLException e) {
+            System.out.println(ps.toString());
             e.printStackTrace();
         } finally {
             if (ps != null) {

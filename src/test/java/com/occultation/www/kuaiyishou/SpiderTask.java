@@ -15,6 +15,16 @@ public class SpiderTask {
         String[] urls = {
                 "https://kuaiyinshi.com/api/dou-yin/recommend/",
                 "https://kuaiyinshi.com/api/dou-yin/recommend/",
+                "https://kuaiyinshi.com/api/dou-yin/recommend/",
+                "https://kuaiyinshi.com/api/dou-yin/recommend/",
+                "https://kuaiyinshi.com/api/dou-yin/recommend/",
+                "https://kuaiyinshi.com/api/dou-yin/recommend/",
+                "https://kuaiyinshi.com/api/dou-yin/recommend/",
+                "https://kuaiyinshi.com/api/dou-yin/recommend/",
+                "https://kuaiyinshi.com/api/dou-yin/recommend/",
+                "https://kuaiyinshi.com/api/dou-yin/recommend/",
+                "https://kuaiyinshi.com/api/dou-yin/recommend/",
+                "https://kuaiyinshi.com/api/dou-yin/recommend/",
                 "https://kuaiyinshi.com/api/dou-yin/recommend/"
         };
 
@@ -22,7 +32,7 @@ public class SpiderTask {
                 .setClasspath("com.occultation.www.kuaiyishou")
                 .setDeep(1)
                 .setInterval(1000)
-                .setSpiderSize(3)
+                .setSpiderSize(5)
                 .setSeed(urls)
                 .setQueue(new RevisitReqQueue())
                 .setCanExtractHref(false)

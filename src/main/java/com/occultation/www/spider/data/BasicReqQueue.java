@@ -38,7 +38,7 @@ public class BasicReqQueue implements ReqQueue {
     public SpiderRequest poll() {
         SpiderRequest request = now.poll();
         if (request != null) {
-            log.info("consume request [{}]",request.getUrl());
+            log.debug("consume request [{}]",request.getUrl());
         }
         return request;
     }
@@ -47,7 +47,7 @@ public class BasicReqQueue implements ReqQueue {
     public boolean offer(SpiderRequest request) {
         boolean flag = !visit.isVisited(request.getKey()) && next.offer(request);
         if (flag) {
-            log.info("add request [{}]", request.getUrl());
+            log.debug("add request [{}]", request.getUrl());
         }
         return flag;
     }

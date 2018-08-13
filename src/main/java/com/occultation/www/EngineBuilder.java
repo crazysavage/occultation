@@ -2,6 +2,9 @@ package com.occultation.www;
 
 import com.google.common.collect.Lists;
 import com.occultation.www.net.SpiderRequest;
+import com.occultation.www.net.proxy.ProxyPool;
+import com.occultation.www.net.proxy.SimpleProxyPool;
+import com.occultation.www.spider.data.BasicReqQueue;
 import com.occultation.www.spider.data.ReqQueue;
 import com.occultation.www.util.Assert;
 
@@ -34,6 +37,8 @@ public class EngineBuilder {
     private String classpath;
 
     private Boolean canExtractHref;
+
+    private ProxyPool proxyPool;
 
     public static EngineBuilder create() {
         return new EngineBuilder();
@@ -88,6 +93,11 @@ public class EngineBuilder {
         return this;
     }
 
+    public final EngineBuilder setProxyPool(ProxyPool proxyPool) {
+        this.proxyPool = proxyPool;
+        return this;
+    }
+
     public final Engine build() {
         Assert.isTrue(StringUtils.isNotEmpty(classpath),"classpath cant be null");
         Assert.isTrue(CollectionUtils.isNotEmpty(seeds),"seed size is 0");
@@ -108,7 +118,15 @@ public class EngineBuilder {
         }
         engine.setDeep(deep);
 
+        if (queue == null) {
+            queue = new BasicReqQueue();
+        }
         engine.setQueue(queue);
+
+        if (proxyPool == null) {
+            proxyPool = new SimpleProxyPool();
+        }
+        engine.setProxyPool(proxyPool);
 
         if (canExtractHref == null) {
             canExtractHref = false;
