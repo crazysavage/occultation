@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * TODO
+ * 标记在spiderBean上，表示该字段需要加入到爬虫队列中
  *
  * @author Liss
  * @version V1.0

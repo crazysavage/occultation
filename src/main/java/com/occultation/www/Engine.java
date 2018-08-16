@@ -70,8 +70,7 @@ public class Engine {
 
         int step = 1;
         while (deep < 0 || deep > 0) {
-            ++step;
-            log.info("------->>>>执行第{}次循环<<<<-------", step);
+            log.info("------->>>>执行第{}次循环<<<<-------", step++);
             try {
                 cdl.await();
             } catch (InterruptedException e) {

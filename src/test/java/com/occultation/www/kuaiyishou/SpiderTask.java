@@ -16,7 +16,7 @@ public class SpiderTask {
                 "https://kuaiyinshi.com/api/dou-yin/recommend/",
                 "https://kuaiyinshi.com/api/dou-yin/recommend/",
                 "https://kuaiyinshi.com/api/dou-yin/recommend/",
-                "https://kuaiyinshi.com/api/dou-yin/recommend/",
+                "https://kuafiyinshi.com/api/dou-yin/recommend/",
                 "https://kuaiyinshi.com/api/dou-yin/recommend/",
                 "https://kuaiyinshi.com/api/dou-yin/recommend/",
                 "https://kuaiyinshi.com/api/dou-yin/recommend/",

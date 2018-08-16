@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +29,7 @@ public class FileUtil {
 
     private static Logger log = LoggerFactory.getLogger(FileUtil.class);
 
-    public static File getFile(String resourceLocation) throws FileNotFoundException {
+    public static InputStream getInputStream(String resourceLocation) throws FileNotFoundException {
         Assert.notNull(resourceLocation, "Resource location must not be null");
         if (resourceLocation.startsWith(CLASSPATH_URL_PREFIX)) {
             String path = resourceLocation.substring(CLASSPATH_URL_PREFIX.length());
@@ -39,35 +40,41 @@ public class FileUtil {
                 throw new FileNotFoundException(description +
                         " cannot be resolved to absolute file path because it does not exist");
             }
-            return getFile(url, description);
+            return getInputStream(url, description);
         }
         try {
             // try URL
-            return getFile(new URL(resourceLocation));
+            return getInputStream(new URL(resourceLocation));
         }
         catch (MalformedURLException ex) {
             // no URL -> treat as file path
-            return new File(resourceLocation);
+            return new FileInputStream(new File(resourceLocation));
         }
     }
 
-    public static File getFile(URL resourceUrl) throws FileNotFoundException {
-        return getFile(resourceUrl, "URL");
+    public static InputStream getInputStream(URL resourceUrl) throws FileNotFoundException {
+        return getInputStream(resourceUrl, "URL");
     }
 
-    public static File getFile(URL resourceUrl, String description) throws FileNotFoundException {
+    public static InputStream getInputStream(URL resourceUrl, String description) throws FileNotFoundException {
         Assert.notNull(resourceUrl, "Resource URL must not be null");
         if (!URL_PROTOCOL_FILE.equals(resourceUrl.getProtocol())) {
-            throw new FileNotFoundException(
+
+            try {
+                return resourceUrl.openStream();
+
+            } catch (IOException e) {
+                throw new FileNotFoundException(
                     description + " cannot be resolved to absolute file path " +
-                            "because it does not reside in the file system: " + resourceUrl);
+                        "because it does not reside in the file or jar system: " + resourceUrl);
+            }
+
         }
         try {
-            return new File(toURI(resourceUrl).getSchemeSpecificPart());
+            return new FileInputStream(new File(toURI(resourceUrl).getSchemeSpecificPart()));
         }
         catch (URISyntaxException ex) {
-            // Fallback for URLs that are not valid URIs (should hardly ever happen).
-            return new File(resourceUrl.getFile());
+            return new FileInputStream(new File(resourceUrl.getFile()));
         }
     }
 
@@ -80,19 +87,25 @@ public class FileUtil {
     }
 
     public static List<String> readLine(String path) {
+        return readLine(path,false);
+    }
 
-        File file;
+    public static List<String> readLine(String path,boolean isThrow) {
+        InputStream is;
+
         try {
-            file = getFile(path);
+            is = getInputStream(path);
         } catch (FileNotFoundException e) {
-            log.error("get file error",e);
+            if (isThrow) {
+                throw new RuntimeException(e);
+            }
+            log.warn("file {} is not found",path);
             return Collections.emptyList();
         }
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(
-                        new FileInputStream(file),
-                        "utf-8"))) {
+                    is, StandardCharsets.UTF_8))) {
             reader.readLine();
             String temp;
             List<String> res = new ArrayList<>();
@@ -110,16 +123,10 @@ public class FileUtil {
 
     public static Properties loadPropertyFile(String fullFile) {
         Properties p = new Properties();
-        File file;
-        try {
-            file = FileUtil.getFile(fullFile);
-        } catch (FileNotFoundException e) {
-            return p;
-        }
-        try (InputStream in = new FileInputStream(file)){
+        try (InputStream in = FileUtil.getInputStream(fullFile)){
             p.load(in);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("cant read input stream",e);
         }
         return p;
     }

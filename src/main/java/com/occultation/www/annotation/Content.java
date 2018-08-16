@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * TODO
+ * 标记spiderBean的上下文
  *
  * @author Liss
  * @version V1.0

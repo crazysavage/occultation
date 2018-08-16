@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * TODO
+ * 标记在SpiderBean的字段上。标识该字段的值，需要执行ajax请求获取
  *
  * @author Liss
  * @version V1.0
@@ -18,6 +18,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Ajax {
+
     String src();
 
     HttpMethodEnum method() default HttpMethodEnum.GET;

@@ -2,6 +2,9 @@ package com.occultation.www.util;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * TODO
@@ -24,6 +27,18 @@ public class ClassUtils {
         return b.isAssignableFrom(a);
 
     }
+
+    public static boolean isBaseType(Class<?> a) {
+        return a.isPrimitive()
+            || a.equals(String.class)
+            || a.equals(Integer.class)
+            || a.equals(Long.class)
+            || a.equals(Double.class)
+            || a.equals(Byte.class)
+            || a.equals(Boolean.class);
+    }
+
+
 
     public static ClassLoader getDefaultClassLoader() {
         ClassLoader cl = null;

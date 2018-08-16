@@ -16,7 +16,7 @@ public class UserAgent {
     private static final String[] USER_AGENT;
 
     static {
-        USER_AGENT = FileUtil.readLine("classpath:userAgents").toArray(new String[0]);
+        USER_AGENT = FileUtil.readLine("classpath:userAgents",true).toArray(new String[0]);
     }
 
 

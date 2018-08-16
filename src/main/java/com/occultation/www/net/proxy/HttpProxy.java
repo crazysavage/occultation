@@ -29,28 +29,6 @@ public class HttpProxy implements Cloneable, Serializable {
     protected final Proxy proxy;
 
 
-    static class Proxy {
-
-        private final AtomicInteger failNum = new AtomicInteger(0);
-
-        private final AtomicInteger reqNum = new AtomicInteger(0);
-
-        private final AtomicInteger countFailNum = new AtomicInteger(0);
-
-        public AtomicInteger getFailNum() {
-            return failNum;
-        }
-
-        public AtomicInteger getReqNum() {
-            return reqNum;
-        }
-
-        public AtomicInteger getCountFailNum() {
-            return countFailNum;
-        }
-    }
-
-
     private HttpProxy(final String hostname, final int port, final String scheme) {
         super();
         Assert.notNull(hostname,"host name must not be null");
@@ -172,6 +150,41 @@ public class HttpProxy implements Cloneable, Serializable {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    static class Proxy {
+
+        private final AtomicInteger failNum = new AtomicInteger(0);
+
+        private final AtomicInteger reqNum = new AtomicInteger(0);
+
+        private final AtomicInteger countFailNum = new AtomicInteger(0);
+
+        public AtomicInteger getFailNum() {
+            return failNum;
+        }
+
+        public AtomicInteger getReqNum() {
+            return reqNum;
+        }
+
+        public AtomicInteger getCountFailNum() {
+            return countFailNum;
+        }
+    }
+
+    public int getFailNum() {
+        return proxy.getFailNum().get();
+    }
+
+
+    public int getReqNum() {
+        return proxy.getReqNum().get();
+    }
+
+
+    public int getCountFailNum() {
+        return proxy.getCountFailNum().get();
     }
 
 
