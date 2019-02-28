@@ -140,7 +140,7 @@ gradle.taskGraph.whenReady { taskGraph ->
                 }
 
                 snapshotRepository(url: 'http://nexus.51caocao.cn/content/repositories/snapshots') {
-                    authentication(userName: 'yejunyou', password: 'Chinaboy@456')
+                    authentication(userName: '', password: '')
                 }
                 uniqueVersion = true
                 pom.groupId = "com.occultation.www"
