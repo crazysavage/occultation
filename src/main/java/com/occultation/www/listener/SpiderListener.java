@@ -8,6 +8,8 @@ package com.occultation.www.listener;
  */
 public interface SpiderListener {
 
+    void beforeStart();
+
     void afterComplete();
 
 }

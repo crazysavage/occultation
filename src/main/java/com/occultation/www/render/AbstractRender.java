@@ -3,13 +3,16 @@ package com.occultation.www.render;
 import com.occultation.www.SpiderContext;
 import com.occultation.www.annotation.Ajax;
 import com.occultation.www.annotation.Href;
-import com.occultation.www.annotation.Html;
 import com.occultation.www.model.SpiderBean;
 import com.occultation.www.net.SpiderRequest;
 import com.occultation.www.net.SpiderResponse;
 import com.occultation.www.spider.SpiderThreadLocal;
 import com.occultation.www.spider.data.QueueContext;
-import com.occultation.www.util.*;
+import com.occultation.www.util.Assert;
+import com.occultation.www.util.BeanUtils;
+import com.occultation.www.util.ClassUtils;
+import com.occultation.www.util.FactoryUtils;
+import com.occultation.www.util.UrlUtils;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -44,17 +47,19 @@ public abstract class AbstractRender implements IRender,IFieldRender  {
 
         return null;
     }
+
     @SuppressWarnings({"unchecked"})
     public void ajaxRender(SpiderBean bean, SpiderRequest req) {
-        if (!SpiderThreadLocal.get().getEngine().isComplete()) {
-            return;
-        }
 
         Set<Field> fields = ReflectionUtils.getAllFields(bean.getClass(),ReflectionUtils.withAnnotation(Ajax.class));
         for (Field field :  fields) {
             Assert.isTrue(ClassUtils.isSubType((Class)field.getGenericType(),SpiderBean.class),"Ajax should annotation SpiderBean");
             Ajax ajax = field.getAnnotation(Ajax.class);
             String url = UrlUtils.composeUrl(ajax.src(),req,bean);
+
+            if (StringUtils.isEmpty(url)) {
+                return;
+            }
             SpiderRequest subReq = req.subRequest(url);
             subReq.setType(ajax.method());
             SpiderResponse ajaxRes = new SpiderResponse();

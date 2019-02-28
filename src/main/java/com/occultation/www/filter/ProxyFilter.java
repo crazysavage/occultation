@@ -19,7 +19,14 @@ public class ProxyFilter implements Filter {
         HttpProxy httpProxy =  SpiderThreadLocal.get().getEngine().getProxyPool().getProxy(req.getProxy());
         req.setProxy(httpProxy);
 
-        chain.doFilter(req,res);
+        try {
+            chain.doFilter(req,res);
+        } catch (Exception e) {
+            if (httpProxy != null) {
+                httpProxy.fail();
+            }
+            throw e;
+        }
 
         if (httpProxy == null) {
             return;

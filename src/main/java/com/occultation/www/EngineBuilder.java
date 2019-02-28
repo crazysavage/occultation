@@ -2,18 +2,17 @@ package com.occultation.www;
 
 import com.google.common.collect.Lists;
 import com.occultation.www.net.SpiderRequest;
+import com.occultation.www.net.proxy.DefaultProxyPool;
 import com.occultation.www.net.proxy.ProxyPool;
-import com.occultation.www.net.proxy.SimpleProxyPool;
 import com.occultation.www.spider.data.BasicReqQueue;
 import com.occultation.www.spider.data.ReqQueue;
 import com.occultation.www.util.Assert;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * TODO
@@ -124,7 +123,7 @@ public class EngineBuilder {
         engine.setQueue(queue);
 
         if (proxyPool == null) {
-            proxyPool = new SimpleProxyPool();
+            proxyPool = new DefaultProxyPool();
         }
         engine.setProxyPool(proxyPool);
 

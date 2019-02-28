@@ -37,9 +37,9 @@ public class BeanUtils {
     public static Object getValue(Object bean, String fieldName) {
         Field field;
         try {
-            field = bean.getClass().getField(fieldName);
+            field = bean.getClass().getDeclaredField(fieldName);
         } catch (NoSuchFieldException e) {
-            throw new RuntimeException(fieldName + "no defined in "+ bean.getClass().getName(),e);
+            throw new RuntimeException(fieldName + " no defined in "+ bean.getClass().getName(),e);
         }
         return getValue(bean,field);
     }

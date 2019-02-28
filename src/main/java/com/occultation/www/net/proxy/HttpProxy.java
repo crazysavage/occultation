@@ -152,7 +152,9 @@ public class HttpProxy implements Cloneable, Serializable {
         return super.clone();
     }
 
-    static class Proxy {
+    static class Proxy implements Serializable {
+
+        private static final long serialVersionUID = 239022907038734530L;
 
         private final AtomicInteger failNum = new AtomicInteger(0);
 

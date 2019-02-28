@@ -1,17 +1,19 @@
 package com.occultation.www.util;
 
 import com.occultation.www.net.SpiderRequest;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -25,8 +27,15 @@ public class UrlUtils {
 
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{(.*?)}");
 
+    private static final String IF_NOT_EXIST_R_NULL = "!";
+
     public static String composeUrl(String url,SpiderRequest req,Object bean) {
-        Matcher matcher = PLACEHOLDER.matcher(url);
+
+        boolean RETURN_NULL =  url.startsWith(IF_NOT_EXIST_R_NULL);
+        String urlValue = RETURN_NULL ? url.substring(IF_NOT_EXIST_R_NULL.length()) : url;
+
+
+        Matcher matcher = PLACEHOLDER.matcher(urlValue);
         List<String> names = new ArrayList<>();
         while(matcher.find()) {
             String name = matcher.group(1);
@@ -35,12 +44,20 @@ public class UrlUtils {
         for (String name : names) {
             Object val = req.getParam(name);
             if (val == null) {
-                val = BeanUtils.getValue(bean,name).toString();
+                val = BeanUtils.getValue(bean,name);
             }
-            url = url.replaceFirst("\\{(.*?)}",val.toString());
+            if (val == null) {
+
+                if (RETURN_NULL) {
+                    return "";
+                }
+
+                val = "";
+            }
+            urlValue = urlValue.replaceFirst("\\{(.*?)}",getURLEncoderString(val.toString()));
         }
 
-        return url;
+        return urlValue;
     }
 
     public static Map<String, String> match(String url, String regex) {
@@ -100,5 +117,19 @@ public class UrlUtils {
         }
         
     }
+
+    public static String getURLEncoderString(String str) {
+        String result = "";
+        if (null == str) {
+            return "";
+        }
+        try {
+            result = URLEncoder.encode(str, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
 
 }
