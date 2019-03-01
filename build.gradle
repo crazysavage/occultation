@@ -64,7 +64,7 @@ task cleanAll {
     }
 }
 
-task init {
+task initOut {
     doLast{
         println '+------------------------------------------------------------------+'
         println '|                                                                  |'
@@ -81,7 +81,7 @@ tasks.withType(JavaCompile) {
     targetCompatibility = 1.8
 }
 
-compileJava.dependsOn([init])
+compileJava.dependsOn([initOut])
 
 task sourceJar(type: Jar) {
     classifier = 'sources'
