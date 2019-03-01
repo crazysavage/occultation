@@ -53,7 +53,7 @@ import sun.misc.BASE64Encoder;
 @Fetch("default")
 public class DefaultFetch extends AbstractFetch {
     
-    private static final int TIME_OUT = 10000;
+    private static final int TIME_OUT = 30000;
     
     private static final Logger log = LoggerFactory.getLogger(DefaultFetch.class);
     

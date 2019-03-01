@@ -60,6 +60,8 @@ public class Engine {
 
         Assert.isTrue(CollectionUtils.isNotEmpty(seeds),"seed's size is empty");
 
+        this.contextFactory.getListeners().forEach(SpiderListener::beforeStart);
+
         for (SpiderRequest request : seeds) {
             queue.offer(request);
         }

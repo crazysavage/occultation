@@ -11,6 +11,11 @@ import com.occultation.www.listener.SpiderListener;
 public class MyListener implements SpiderListener {
 
     @Override
+    public void beforeStart() {
+
+    }
+
+    @Override
     public void afterComplete() {
         System.out.println("engine is stop");
     }

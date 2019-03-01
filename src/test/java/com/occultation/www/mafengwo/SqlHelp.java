@@ -6,10 +6,14 @@ import com.alibaba.fastjson.JSONPath;
 import com.occultation.www.util.FileUtil;
 
 import javax.sql.DataSource;
+
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,7 +26,6 @@ import java.util.regex.Pattern;
 public class SqlHelp {
 
     private static DataSource dds = null;
-
 
     private static class S{
         private static SqlHelp instance = new SqlHelp();
@@ -67,6 +70,56 @@ public class SqlHelp {
 
     private String formatSql(String sql) {
         return sql.replaceAll("#\\{(.*?)}","?");
+
+    }
+
+
+    private List<Field> getFields(Class clazz) {
+
+        Field[] fs = clazz.getDeclaredFields();
+        if (fs == null) {
+            return null;
+        }
+        List<Field> fields = new ArrayList<>();
+        for (Field f : fs) {
+            f.setAccessible(true);
+            fields.add(f);
+        }
+
+        return fields;
+
+    }
+
+    public <T> List<T> select(String sql,Class<T> clazz) {
+
+        List<Field> fields = getFields(clazz);
+        if (fields == null) {
+            return null;
+        }
+
+        try (Connection connection = getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql)){
+
+            ResultSet set = ps.executeQuery();
+
+            List<T> res = new ArrayList<>();
+            while(set.next()) {
+                T t = clazz.newInstance();
+                for (Field f : fields) {
+                    Object o = set.getString(f.getName());
+                    if (f.getType() == Integer.class) {
+                        o = Integer.parseInt((String) o);
+                    }
+                    f.set(t,o);
+                }
+                res.add(t);
+            }
+            return res;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
 
     }
 

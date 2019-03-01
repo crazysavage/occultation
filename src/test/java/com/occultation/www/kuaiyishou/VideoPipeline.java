@@ -7,6 +7,8 @@ import com.occultation.www.net.SpiderRequest;
 import com.occultation.www.net.SpiderResponse;
 import com.occultation.www.render.IPipeline;
 import com.occultation.www.spider.SpiderThreadLocal;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +26,7 @@ public class VideoPipeline implements IPipeline {
     private static final Logger log = LoggerFactory.getLogger(VideoPipeline.class);
 
     private static AtomicInteger count = new AtomicInteger(0);
-    private static final int max = 9770;
+    private static final int max = 6000;
 
     private static final String SQL = "INSERT INTO `test`.`short_video` (`desc`,`author_name`,`video_url`,`support`,`share`,`play`,`comment`) VALUES"
             + "(#{desc},#{authorName},#{videoUrl},#{support},#{share},#{play},#{comment})";
@@ -33,6 +35,10 @@ public class VideoPipeline implements IPipeline {
     public void process(SpiderBean bean, SpiderRequest req, SpiderResponse res) {
         VideoResultBean resultBean = (VideoResultBean)bean;
         resultBean.getData().forEach(video -> {
+            if (StringUtils.isEmpty(video.getDesc())) {
+                return;
+            }
+
             String url = video.getVideoUrl();
             //下载视频
             String filePath = FileDownLoad.download(UrlEncrypt.encrypt(url));
@@ -43,11 +49,12 @@ public class VideoPipeline implements IPipeline {
             SqlHelp.getInstance().insert(SQL,video);
             log.info("download video, name={},desc={}",filePath,video.getDesc());
 
+          if (count.incrementAndGet() > max) {
+            SpiderThreadLocal.get().stop();
+          }
         });
 
-        if (count.incrementAndGet() > max) {
-            SpiderThreadLocal.get().stop();
-        }
+
 
     }
 

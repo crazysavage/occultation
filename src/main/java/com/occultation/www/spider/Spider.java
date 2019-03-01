@@ -81,7 +81,6 @@ public class Spider implements Runnable {
 
                 } catch (Exception e) {
                     log.error("非期望异常",e);
-                    engine.notifyComplete();
                 }
 
             }
@@ -126,5 +125,6 @@ public class Spider implements Runnable {
     public Engine getEngine() {
         return engine;
     }
+
 
 }
